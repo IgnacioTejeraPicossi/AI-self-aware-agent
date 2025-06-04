@@ -4,6 +4,18 @@
 
 import readline from 'readline';
 
+// ANSI color codes
+const colors = {
+  reset: '\x1b[0m',
+  bright: '\x1b[1m',
+  dim: '\x1b[2m',
+  fg: {
+    green: '\x1b[32m',
+    blue: '\x1b[34m',
+    yellow: '\x1b[33m'
+  }
+};
+
 /**
  * Class representing the keyboard input sensor
  */
@@ -41,9 +53,19 @@ export class KeyboardSensor {
       };
 
       this.onInput(event);
+      this.prompt();
     });
 
-    console.log('[Keyboard] Listening for input...');
+    this.prompt();
+  }
+
+  /**
+   * Displays the input prompt
+   * @private
+   */
+  prompt() {
+    this.rl.setPrompt(colors.fg.green + '> ' + colors.reset);
+    this.rl.prompt();
   }
 
   /**
@@ -54,7 +76,7 @@ export class KeyboardSensor {
     
     this.isListening = false;
     this.rl.close();
-    console.log('[Keyboard] Stopped listening.');
+    console.log(colors.fg.yellow + '[Keyboard] Stopped listening.' + colors.reset);
   }
 
   /**

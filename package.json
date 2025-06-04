@@ -13,16 +13,17 @@
   "dependencies": {
     "@tensorflow/tfjs-node": "^4.17.0",
     "brain.js": "^2.0.0-beta.23",
-    "sqlite3": "^5.1.7",
     "node-key-sender": "^1.0.11",
     "node-microphone": "^0.1.0",
-    "node-webcam": "^0.8.2"
+    "node-webcam": "^0.8.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
   },
   "devDependencies": {
-    "vitest": "^1.2.2",
-    "@vitest/coverage-v8": "^1.2.2"
+    "@vitest/coverage-v8": "^1.2.2",
+    "vitest": "^1.2.2"
   },
   "engines": {
     "node": ">=20.0.0"
   }
-} 
+}
