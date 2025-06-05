@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Self-Aware Agent</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Self-Aware Agent</h1>
+            <p class="subtitle">A minimal self-aware agent prototype</p>
+        </header>
+
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="label">Energy:</span>
+                <span id="energy" class="value">--</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Mood:</span>
+                <span id="mood" class="value">--</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Confidence:</span>
+                <span id="confidence" class="value">--</span>
+            </div>
+        </div>
+
+        <div class="chat-container">
+            <div id="chat-messages" class="chat-messages"></div>
+            <div class="input-container">
+                <input type="text" id="user-input" placeholder="Type your message here...">
+                <button id="send-button">Send</button>
+            </div>
+        </div>
+
+        <div class="commands">
+            <h3>Available Commands:</h3>
+            <ul>
+                <li><code>:introspect</code> - Show current internal state</li>
+                <li><code>:status</code> - Show current status</li>
+                <li><code>:help</code> - Show this help message</li>
+                <li><code>:stop</code> - Stop the agent</li>
+            </ul>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Main perception-action loop for the agent
  */
-
+import { chatWithGPT } from '../llm/openai.js';
 import { Self } from '../self.js';
 import { KeyboardSensor } from '../sensors/keyboard.js';
 import { MemoryDB } from '../memory/db.js';
@@ -211,38 +211,13 @@ export class AgentLoop {
    */
   async generateResponse(event) {
     const state = this.self.getState();
-    
-    // Check if agent can respond
-    if (!this.self.canPerformAction('respond')) {
-      return {
-        type: 'console',
-        content: colors.fg.yellow + "I'm feeling a bit low on energy. I need to recharge." + colors.reset,
-        metadata: { energy: state.energy }
-      };
-    }
 
-    // Simple response generation based on input content
-    const content = event.content.toLowerCase();
-    let response;
-
-    if (content.includes('hello') || content.includes('hi')) {
-      response = colors.fg.green + "Hi there! How can I help you today?" + colors.reset;
-    } else if (content.includes('how are you')) {
-      const moodText = state.mood > 0.5 ? 'great' : 
-                      state.mood < -0.5 ? 'not so good' : 'okay';
-      response = colors.fg.blue + `I'm feeling ${moodText}. ` + 
-                colors.fg.green + `My energy level is at ${Math.round(state.energy)}%.` + colors.reset;
-    } else if (content.includes('tired')) {
-      response = colors.fg.yellow + `I notice you mentioned feeling tired. ` +
-                colors.fg.green + `My energy level is at ${Math.round(state.energy)}%. ` +
-                colors.fg.blue + `Would you like to take a break?` + colors.reset;
-    } else {
-      response = colors.fg.cyan + "I'm processing what you said. Could you tell me more?" + colors.reset;
-    }
+    // Use ChatGPT for all user input
+    const gptResponse = await chatWithGPT(event.content);
 
     return {
       type: 'console',
-      content: response,
+      content: gptResponse,
       metadata: {
         energy: state.energy,
         mood: state.mood,
@@ -268,7 +243,10 @@ export class AgentLoop {
     // Update internal state
     this.self.recordActionImpact('respond', true);
 
-    // Output the response
-    console.log(`\n[Agent] ${response.content}\n`);
+    // Output the response with a newline before and after
+    console.log('\n' + colors.fg.cyan + '[Agent] ' + colors.reset + response.content + '\n');
+    
+    // Update status bar after response
+    this.updateStatusBar();
   }
 } 
