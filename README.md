@@ -1,6 +1,6 @@
-# AI Self-Aware Agent Prototype
+# AI Self-Aware Agent
 
-A minimal self-aware agent prototype that emulates core traits of a biological "self" through Node.js. This project demonstrates how a synthetic "self" can arise through multi-source information integration, persistent internal representation, and a perception-action cycle with learning and self-reflection.
+A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI) integration for advanced conversational abilities.
 
 ## Architecture
 
@@ -40,6 +40,9 @@ graph TD
 - **Perception → Evaluation → Action Loop**: Core decision-making cycle
 - **Metacognition**: Ability to introspect and verbalize internal states
 - **Learning**: Q-learning implementation for action selection
+- **Web interface** (localhost:5000)
+- **ChatGPT integration** (if OpenAI API key is provided)
+- Fallback to rule-based responses if no API key is present
 
 ## Prerequisites
 
@@ -60,6 +63,13 @@ graph TD
    npm install
    ```
 
+## Environment Variables
+To enable ChatGPT integration, create a `.env` file in the project root:
+```
+OPENAI_API_KEY=sk-...your-key-here...
+```
+If this variable is not set, the agent will run in local mode and provide basic fallback responses.
+
 ## Usage
 
 ### Basic Run
@@ -76,6 +86,18 @@ npm run simulate
 ```bash
 npm test
 ```
+
+### Web Interface (Recommended)
+```bash
+npm run web
+```
+Then open [http://localhost:5000](http://localhost:5000) in your browser.
+
+### Available commands:
+- `:introspect` — Show current internal state
+- `:status` — Show current status
+- `:help` — Show help message
+- `:stop` — Stop the agent
 
 ## Example Session
 
