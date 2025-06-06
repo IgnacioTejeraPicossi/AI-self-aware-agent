@@ -42,7 +42,7 @@ graph TD
 - **Learning**: Q-learning implementation for action selection
 - **Web interface** (localhost:5000)
 - **ChatGPT integration** (if OpenAI API key is provided)
-- Fallback to rule-based responses if no API key is present
+- **Graceful fallback** to rule-based responses if no API key or quota is available
 
 ## Prerequisites
 
@@ -169,3 +169,16 @@ Contributions are welcome! Please read our contributing guidelines before submit
 ## License
 
 MIT License - see LICENSE file for details 
+
+## ChatGPT Integration Details
+- If `OPENAI_API_KEY` is set and valid, all user messages are sent to ChatGPT (e.g., `gpt-4o` or `gpt-3.5-turbo`) and responses are shown in the web UI.
+- If the key is missing, invalid, or you have exceeded your quota, the agent will display a clear message and echo the user's input as a fallback.
+- No API key is required for local/rule-based mode.
+
+## Error Handling & Troubleshooting
+- **401 Authentication Error:** Your API key is invalid, revoked, or not enabled for API access. Create a new key at https://platform.openai.com/account/api-keys and update your `.env` file.
+- **429 Quota Error:** You have exceeded your OpenAI API quota or rate limits. Check your usage and billing at https://platform.openai.com/usage and https://platform.openai.com/account/billing/overview. The agent will automatically fall back to local mode if quota is exceeded.
+- **Fallback Mode:** If the API key is missing, invalid, or quota is exceeded, the agent will continue to function with basic rule-based responses and will not crash.
+
+## Security
+- **Never commit your `.env` file or API key to public repositories.** 
