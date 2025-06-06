@@ -63,7 +63,7 @@ wss.on('connection', (ws) => {
         // Send response back to client
         ws.send(JSON.stringify({
           type: 'response',
-          data: response
+          data: resp|onse
         }));
 
         // Update state
@@ -94,4 +94,6 @@ wss.on('connection', (ws) => {
 // Start server
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
-}); 
+});
+
+console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : '[NOT FOUND]'); 

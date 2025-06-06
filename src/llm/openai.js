@@ -14,7 +14,7 @@ export async function chatWithGPT(prompt) {
     return "I'm running in local mode. No OpenAI API key was found, so I can only give basic responses. Your message was: " + prompt;
   }
   const completion = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o',
     messages: [{ role: 'user', content: prompt }],
     max_tokens: 200
   });
