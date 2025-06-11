@@ -1,7 +1,7 @@
 /**
  * @fileoverview Main perception-action loop for the agent
  */
-import { chatWithGPT } from '../llm/openai.js';
+import { chatWithLLM } from '../llm/llm.js';
 import { Self } from '../self.js';
 import { KeyboardSensor } from '../sensors/keyboard.js';
 import { MemoryDB } from '../memory/db.js';
@@ -211,13 +211,10 @@ export class AgentLoop {
    */
   async generateResponse(event) {
     const state = this.self.getState();
-
-    // Use ChatGPT for all user input
-    const gptResponse = await chatWithGPT(event.content);
-
+    const llmResponse = await chatWithLLM(event.content);
     return {
       type: 'console',
-      content: gptResponse,
+      content: llmResponse,
       metadata: {
         energy: state.energy,
         mood: state.mood,

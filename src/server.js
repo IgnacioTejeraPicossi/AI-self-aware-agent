@@ -7,6 +7,8 @@ import cors from 'cors';
 import { AgentLoop } from './core/loop.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { GoogleGenerativeAI } from '@google/generative-ai';
+import { claudeWithSDK, claudeStreaming, isClaudeConfigured } from './claude.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -49,21 +51,30 @@ wss.on('connection', (ws) => {
       const data = JSON.parse(message);
       
       if (data.type === 'input') {
-        // Handle user input
-        const response = await agent.generateResponse({
-          type: 'keyboard_input',
-          timestamp: Date.now(),
-          content: data.content,
-          metadata: {
-            length: data.content.length,
-            hasSpecialChars: /[^a-zA-Z0-9\s]/.test(data.content)
-          }
-        });
+        let response;
+        
+        // Choose AI model based on request
+        if (data.model === 'claude') {
+          response = await claudeWithSDK(data.content);
+        } else {
+          // Default to existing Gemini model
+          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+          const model = genAI.getGenerativeModel({ model: 'models/gemini-pro-001' });
+          response = await agent.generateResponse({
+            type: 'keyboard_input',
+            timestamp: Date.now(),
+            content: data.content,
+            metadata: {
+              length: data.content.length,
+              hasSpecialChars: /[^a-zA-Z0-9\s]/.test(data.content)
+            }
+          });
+        }
 
         // Send response back to client
         ws.send(JSON.stringify({
           type: 'response',
-          data: resp|onse
+          data: response
         }));
 
         // Update state
@@ -91,9 +102,59 @@ wss.on('connection', (ws) => {
   });
 });
 
+// Add Claude endpoints
+app.post('/api/claude/chat', async (req, res) => {
+  try {
+    if (!isClaudeConfigured()) {
+      return res.status(500).json({ error: 'Claude API key not configured' });
+    }
+
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    const response = await claudeWithSDK(message);
+    res.json({ response });
+  } catch (error) {
+    console.error('Claude API Error:', error);
+    res.status(500).json({ error: 'Error processing request' });
+  }
+});
+
+app.post('/api/claude/stream', async (req, res) => {
+  try {
+    if (!isClaudeConfigured()) {
+      return res.status(500).json({ error: 'Claude API key not configured' });
+    }
+
+    const { message } = req.body;
+    if (!message) {
+      return res.status(400).json({ error: 'Message is required' });
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    await claudeStreaming(message, (chunk) => {
+      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
+    });
+
+    res.end();
+  } catch (error) {
+    console.error('Claude Streaming Error:', error);
+    res.status(500).json({ error: 'Error processing request' });
+  }
+});
+
 // Start server
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
 });
 
-console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : '[NOT FOUND]'); 
+console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : '[NOT FOUND]');
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const models = await genAI.listModels();
+console.log(models); 
