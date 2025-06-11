@@ -1,6 +1,6 @@
 # AI Self-Aware Agent
 
-A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI) and Claude (Anthropic) integration for advanced conversational abilities.
+A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google) integration for advanced conversational abilities.
 
 ## Architecture
 
@@ -44,6 +44,7 @@ graph TD
 - **Multiple AI Model Support**:
   - ChatGPT integration (if OpenAI API key is provided)
   - Claude integration (if Anthropic API key is provided)
+  - Gemini integration (if Google API key is provided)
 - **Graceful fallback** to rule-based responses if no API keys or quota is available
 
 ## Prerequisites
@@ -70,6 +71,7 @@ Create a `.env` file in the project root with your API keys:
 ```
 OPENAI_API_KEY=sk-...your-openai-key-here...
 ANTHROPIC_API_KEY=sk-ant-...your-anthropic-key-here...
+GEMINI_API_KEY=...your-gemini-key-here...
 ```
 If these variables are not set, the agent will run in local mode and provide basic fallback responses.
 
@@ -188,8 +190,14 @@ MIT License - see LICENSE file for details
   - `/api/claude/stream` for streaming responses
 - If the key is missing or invalid, the agent will fall back to other available models or local mode.
 
+### Gemini Integration
+- If `GEMINI_API_KEY` is set and valid, you can use Google's Gemini model for responses.
+- Uses the `gemini-pro` model for text generation.
+- Available through the default model selection in the web interface.
+- If the key is missing or invalid, the agent will fall back to other available models or local mode.
+
 ### Model Selection
-- In the web interface, you can choose between available models
+- In the web interface, you can choose between available models (ChatGPT, Claude, or Gemini)
 - The system will automatically fall back to available models if the primary choice is unavailable
 - No API keys are required for local/rule-based mode
 
@@ -197,9 +205,11 @@ MIT License - see LICENSE file for details
 - **401 Authentication Error:** Your API key is invalid or revoked. Create new keys at:
   - OpenAI: https://platform.openai.com/account/api-keys
   - Anthropic: https://console.anthropic.com/
+  - Google AI Studio: https://makersuite.google.com/app/apikey
 - **429 Quota Error:** You have exceeded your API quota or rate limits. Check your usage and billing:
   - OpenAI: https://platform.openai.com/usage
   - Anthropic: https://console.anthropic.com/usage
+  - Google AI Studio: https://ai.google.dev/usage
 - **Fallback Mode:** If API keys are missing, invalid, or quota is exceeded, the agent will continue to function with basic rule-based responses and will not crash.
 
 ## Security
