@@ -1,6 +1,6 @@
 # AI Self-Aware Agent
 
-A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI) integration for advanced conversational abilities.
+A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI) and Claude (Anthropic) integration for advanced conversational abilities.
 
 ## Architecture
 
@@ -41,8 +41,10 @@ graph TD
 - **Metacognition**: Ability to introspect and verbalize internal states
 - **Learning**: Q-learning implementation for action selection
 - **Web interface** (localhost:5000)
-- **ChatGPT integration** (if OpenAI API key is provided)
-- **Graceful fallback** to rule-based responses if no API key or quota is available
+- **Multiple AI Model Support**:
+  - ChatGPT integration (if OpenAI API key is provided)
+  - Claude integration (if Anthropic API key is provided)
+- **Graceful fallback** to rule-based responses if no API keys or quota is available
 
 ## Prerequisites
 
@@ -64,11 +66,12 @@ graph TD
    ```
 
 ## Environment Variables
-To enable ChatGPT integration, create a `.env` file in the project root:
+Create a `.env` file in the project root with your API keys:
 ```
-OPENAI_API_KEY=sk-...your-key-here...
+OPENAI_API_KEY=sk-...your-openai-key-here...
+ANTHROPIC_API_KEY=sk-ant-...your-anthropic-key-here...
 ```
-If this variable is not set, the agent will run in local mode and provide basic fallback responses.
+If these variables are not set, the agent will run in local mode and provide basic fallback responses.
 
 ## Usage
 
@@ -140,6 +143,7 @@ src/
 │   └── types.js      # Memory type definitions
 ├── learning/
 │   └── q-learning.js # Q-learning implementation
+├── claude.js         # Claude API integration
 └── actions/
     ├── console.js    # Console output
     └── file.js       # File writing
@@ -170,15 +174,33 @@ Contributions are welcome! Please read our contributing guidelines before submit
 
 MIT License - see LICENSE file for details 
 
-## ChatGPT Integration Details
-- If `OPENAI_API_KEY` is set and valid, all user messages are sent to ChatGPT (e.g., `gpt-4o` or `gpt-3.5-turbo`) and responses are shown in the web UI.
+## AI Model Integration Details
+
+### ChatGPT Integration
+- If `OPENAI_API_KEY` is set and valid, all user messages are sent to ChatGPT (e.g., `gpt-4` or `gpt-3.5-turbo`) and responses are shown in the web UI.
 - If the key is missing, invalid, or you have exceeded your quota, the agent will display a clear message and echo the user's input as a fallback.
-- No API key is required for local/rule-based mode.
+
+### Claude Integration
+- If `ANTHROPIC_API_KEY` is set and valid, you can use Claude for responses by specifying `model: 'claude'` in your requests.
+- Supports both regular chat and streaming responses.
+- Available endpoints:
+  - `/api/claude/chat` for regular responses
+  - `/api/claude/stream` for streaming responses
+- If the key is missing or invalid, the agent will fall back to other available models or local mode.
+
+### Model Selection
+- In the web interface, you can choose between available models
+- The system will automatically fall back to available models if the primary choice is unavailable
+- No API keys are required for local/rule-based mode
 
 ## Error Handling & Troubleshooting
-- **401 Authentication Error:** Your API key is invalid, revoked, or not enabled for API access. Create a new key at https://platform.openai.com/account/api-keys and update your `.env` file.
-- **429 Quota Error:** You have exceeded your OpenAI API quota or rate limits. Check your usage and billing at https://platform.openai.com/usage and https://platform.openai.com/account/billing/overview. The agent will automatically fall back to local mode if quota is exceeded.
-- **Fallback Mode:** If the API key is missing, invalid, or quota is exceeded, the agent will continue to function with basic rule-based responses and will not crash.
+- **401 Authentication Error:** Your API key is invalid or revoked. Create new keys at:
+  - OpenAI: https://platform.openai.com/account/api-keys
+  - Anthropic: https://console.anthropic.com/
+- **429 Quota Error:** You have exceeded your API quota or rate limits. Check your usage and billing:
+  - OpenAI: https://platform.openai.com/usage
+  - Anthropic: https://console.anthropic.com/usage
+- **Fallback Mode:** If API keys are missing, invalid, or quota is exceeded, the agent will continue to function with basic rule-based responses and will not crash.
 
 ## Security
-- **Never commit your `.env` file or API key to public repositories.** 
+- **Never commit your `.env` file or API keys to public repositories.** 
