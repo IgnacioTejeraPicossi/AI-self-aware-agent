@@ -35,3 +35,6 @@ data/*.db-journal
 # OS files
 .DS_Store
 Thumbs.db 
+
+# Key information
+start-browserbase.ps1
