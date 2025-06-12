@@ -73,7 +73,33 @@ OPENAI_API_KEY=sk-...your-openai-key-here...
 ANTHROPIC_API_KEY=sk-ant-...your-anthropic-key-here...
 GEMINI_API_KEY=...your-gemini-key-here...
 ```
-If these variables are not set, the agent will run in local mode and provide basic fallback responses.
+
+Important notes about API keys:
+- All API keys are optional - the agent will run in local mode if no keys are provided
+- You can use any combination of the available AI models
+- The agent will automatically fall back to available models if one fails
+- Never commit your `.env` file to version control
+
+## API Key Setup Instructions
+
+### OpenAI API Key
+1. Go to https://platform.openai.com/account/api-keys
+2. Create a new API key
+3. Copy the key and add it to your `.env` file
+4. Note: Free tier has limited quota, check usage at https://platform.openai.com/usage
+
+### Anthropic API Key
+1. Go to https://console.anthropic.com/
+2. Sign up or log in
+3. Create a new API key
+4. Copy the key and add it to your `.env` file
+5. Note: Check your quota at https://console.anthropic.com/usage
+
+### Gemini API Key
+1. Go to https://makersuite.google.com/app/apikey
+2. Create a new API key
+3. Copy the key and add it to your `.env` file
+4. Note: Check your usage at https://ai.google.dev/usage
 
 ## Usage
 
@@ -202,15 +228,35 @@ MIT License - see LICENSE file for details
 - No API keys are required for local/rule-based mode
 
 ## Error Handling & Troubleshooting
-- **401 Authentication Error:** Your API key is invalid or revoked. Create new keys at:
-  - OpenAI: https://platform.openai.com/account/api-keys
-  - Anthropic: https://console.anthropic.com/
-  - Google AI Studio: https://makersuite.google.com/app/apikey
-- **429 Quota Error:** You have exceeded your API quota or rate limits. Check your usage and billing:
-  - OpenAI: https://platform.openai.com/usage
-  - Anthropic: https://console.anthropic.com/usage
-  - Google AI Studio: https://ai.google.dev/usage
-- **Fallback Mode:** If API keys are missing, invalid, or quota is exceeded, the agent will continue to function with basic rule-based responses and will not crash.
+
+### Common API Errors
+
+#### OpenAI (ChatGPT)
+- **401 Authentication Error**: Invalid or revoked API key
+- **429 Quota Error**: Exceeded free tier quota
+- **Solution**: Check your usage at https://platform.openai.com/usage
+
+#### Anthropic (Claude)
+- **401 Authentication Error**: Invalid or revoked API key
+- **429 Quota Error**: Exceeded API quota
+- **Solution**: Check your usage at https://console.anthropic.com/usage
+
+#### Gemini
+- **404 Model Not Found**: API version mismatch or model not available
+- **401 Authentication Error**: Invalid API key
+- **Solution**: Ensure you're using the correct model name ("gemini-pro")
+
+### Fallback Behavior
+The agent implements a smart fallback system:
+1. If the primary model fails, it will try the next available model
+2. If all API-based models fail, it will fall back to local rule-based responses
+3. The agent will continue to function even if all API keys are invalid or quota is exceeded
+
+### Debugging Tips
+1. Check the console output for specific error messages
+2. Verify your API keys are correctly set in the `.env` file
+3. Ensure you have sufficient quota for your chosen model
+4. The agent will log which API keys are loaded (but not the actual keys)
 
 ## Security
 - **Never commit your `.env` file or API keys to public repositories.** 
