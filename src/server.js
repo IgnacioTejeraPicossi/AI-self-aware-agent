@@ -59,7 +59,7 @@ wss.on('connection', (ws) => {
         } else {
           // Default to existing Gemini model
           const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: 'models/gemini-pro-001' });
+          const model = genAI.getGenerativeModel({ model: "gemini-pro" });
           response = await agent.generateResponse({
             type: 'keyboard_input',
             timestamp: Date.now(),
@@ -155,6 +155,7 @@ server.listen(port, () => {
 
 console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : '[NOT FOUND]');
 
+// Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const models = await genAI.listModels();
-console.log(models); 
+const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+console.log('Gemini model initialized'); 
