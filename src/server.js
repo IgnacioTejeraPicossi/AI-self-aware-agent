@@ -9,6 +9,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { claudeWithSDK, claudeStreaming, isClaudeConfigured } from './claude.js';
+import { deepseekChat, deepseekStreaming, isDeepseekConfigured } from './deepseek.js';
+import { qwenChat, qwenStreaming, isQwenConfigured } from './qwen.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -148,6 +150,66 @@ app.post('/api/claude/stream', async (req, res) => {
   }
 });
 
+// Add new API endpoints for DeepSeek
+app.post('/api/deepseek/chat', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    const response = await deepseekChat(messages);
+    res.json({ response });
+  } catch (error) {
+    console.error('DeepSeek chat error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/deepseek/stream', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    await deepseekStreaming(messages, (chunk) => {
+      res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+    });
+
+    res.end();
+  } catch (error) {
+    console.error('DeepSeek streaming error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add new API endpoints for Qwen
+app.post('/api/qwen/chat', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    const response = await qwenChat(messages);
+    res.json({ response });
+  } catch (error) {
+    console.error('Qwen chat error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post('/api/qwen/stream', async (req, res) => {
+  try {
+    const { messages } = req.body;
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache');
+    res.setHeader('Connection', 'keep-alive');
+
+    await qwenStreaming(messages, (chunk) => {
+      res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+    });
+
+    res.end();
+  } catch (error) {
+    console.error('Qwen streaming error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Start server
 server.listen(port, () => {
   console.log(`Server running at http://localhost:${port}`);
@@ -158,4 +220,28 @@ console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-console.log('Gemini model initialized'); 
+console.log('Gemini model initialized');
+
+// Update the model selection logic in the generateResponse function
+async function generateResponse(input) {
+  let response;
+  try {
+    // Try each model in order of preference
+    if (isOpenAIConfigured()) {
+      response = await chatGPT(input);
+    } else if (isClaudeConfigured()) {
+      response = await claudeWithSDK(input);
+    } else if (isDeepseekConfigured()) {
+      response = await deepseekChat([{ role: 'user', content: input }]);
+    } else if (isQwenConfigured()) {
+      response = await qwenChat([{ role: 'user', content: input }]);
+    } else {
+      // Fallback to local response
+      response = `I understand you said: "${input}"`;
+    }
+  } catch (error) {
+    console.error('Error generating response:', error);
+    response = `I encountered an error: ${error.message}`;
+  }
+  return response;
+} 

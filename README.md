@@ -1,6 +1,6 @@
 # AI Self-Aware Agent
 
-A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI), Claude (Anthropic), and Gemini (Google) integration for advanced conversational abilities.
+A minimal self-aware agent prototype demonstrating core traits of a biological self, now with optional ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google), DeepSeek, and Qwen 2.5 (Alibaba Cloud) integration for advanced conversational abilities.
 
 ## Architecture
 
@@ -72,6 +72,8 @@ Create a `.env` file in the project root with your API keys:
 OPENAI_API_KEY=sk-...your-openai-key-here...
 ANTHROPIC_API_KEY=sk-ant-...your-anthropic-key-here...
 GEMINI_API_KEY=...your-gemini-key-here...
+DEEPSEEK_API_KEY=...your-deepseek-key-here...
+DASHSCOPE_API_KEY=...your-qwen-key-here...
 ```
 
 Important notes about API keys:
@@ -100,6 +102,19 @@ Important notes about API keys:
 2. Create a new API key
 3. Copy the key and add it to your `.env` file
 4. Note: Check your usage at https://ai.google.dev/usage
+
+### DeepSeek API Key
+1. Visit the DeepSeek Platform and log in or create an account
+2. Go to "API Keys" in the sidebar
+3. Click "Create new API Key", optionally name it, and generate a token
+4. Copy it immediately—you won't be able to view it again
+5. Add it to your `.env` file as DEEPSEEK_API_KEY
+
+### Qwen 2.5 API Key (Alibaba Cloud)
+1. Log in to Alibaba Cloud and ensure your account has Model Studio enabled
+2. Navigate to Model Studio → API Keys (under "AccessKey" or security settings)
+3. Generate the key-pair and note them down
+4. Add it to your `.env` file as DASHSCOPE_API_KEY
 
 ## Usage
 
@@ -245,6 +260,16 @@ MIT License - see LICENSE file for details
 - **404 Model Not Found**: API version mismatch or model not available
 - **401 Authentication Error**: Invalid API key
 - **Solution**: Ensure you're using the correct model name ("gemini-pro")
+
+#### DeepSeek
+- **401 Authentication Error**: Invalid API key
+- **403 Forbidden**: Insufficient permissions
+- **Solution**: Verify your API key and permissions in the DeepSeek dashboard
+
+#### Qwen 2.5 (Alibaba Cloud)
+- **401 Authentication Error**: Invalid API key
+- **403 Forbidden**: Insufficient permissions or quota exceeded
+- **Solution**: Check your Model Studio access and quota in Alibaba Cloud console
 
 ### Fallback Behavior
 The agent implements a smart fallback system:
