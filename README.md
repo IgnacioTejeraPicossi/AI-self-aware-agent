@@ -302,6 +302,54 @@ The agent implements a smart fallback system:
 
 To make interactions feel more natural and engaging, the agent has been enhanced with a three-phase approach to human-like conversation:
 
+```mermaid
+graph TD
+    subgraph User Interaction
+        A[User Input]
+    end
+
+    subgraph "Agent's Brain"
+        B[1. Sentiment Analysis]
+        C[2. Update Internal State]
+        D[3. Conversation History]
+        E[4. Generate Enriched Prompt]
+        F[5. LLM generates Response]
+    end
+
+    subgraph "Agent's Self Model"
+        G[Mood]
+        H[Energy]
+        I[Confidence]
+    end
+
+    subgraph Output
+        J[Fluid, Empathetic Response]
+    end
+
+    A --> B
+    B --> C
+    C --> G
+    A --> D
+    G & H & I & D --> E
+    E --> F
+    F --> J
+    J --> A
+
+    classDef user fill:#cde4ff,stroke:#5a9bd5,stroke-width:2px;
+    classDef brain fill:#ffc7ce,stroke:#c00000,stroke-width:2px;
+    classDef model fill:#e2f0d9,stroke:#548235,stroke-width:2px;
+    classDef output fill:#fff2cc,stroke:#bf8f00,stroke-width:2px;
+
+    class A user;
+    class B,C,D,E,F brain;
+    class G,H,I model;
+    class J output;
+
+    linkStyle 1 fill:none,stroke:#c00000,stroke-width:1.5px,stroke-dasharray: 5 5;
+    linkStyle 2 fill:none,stroke:#548235,stroke-width:1.5px,stroke-dasharray: 5 5;
+    linkStyle 7 fill:none,stroke:#bf8f00,stroke-width:1.5px,stroke-dasharray: 5 5;
+```
+
 ### Phase 1: Context and Personality
 - **Short-Term Memory**: The agent now maintains a rolling history of the last 10 conversation exchanges. This allows it to understand the immediate context of a conversation and avoid asking repetitive questions.
 - **Defined Personality**: A core personality prompt has been integrated, instructing the agent to be friendly, empathetic, and self-aware. This ensures a consistent and engaging tone in all its responses.
