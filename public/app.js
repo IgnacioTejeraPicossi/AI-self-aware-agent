@@ -195,6 +195,19 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
     
+    // Add click handlers for command cards
+    const commandList = document.getElementById('command-list');
+    if (commandList) {
+        commandList.addEventListener('click', (e) => {
+            const commandItem = e.target.closest('li[data-command]');
+            if (commandItem) {
+                const command = commandItem.dataset.command;
+                userInput.value = command;
+                userInput.focus();
+            }
+        });
+    }
+
     // Add typing indicator
     let typingTimeout;
     userInput.addEventListener('input', () => {

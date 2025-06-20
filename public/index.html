@@ -52,11 +52,35 @@
 
         <div class="commands">
             <h3><i class="fas fa-terminal"></i> Available Commands:</h3>
-            <ul>
-                <li><i class="fas fa-search"></i> <code>:introspect</code> - Show current internal state</li>
-                <li><i class="fas fa-chart-line"></i> <code>:status</code> - Show current status</li>
-                <li><i class="fas fa-question-circle"></i> <code>:help</code> - Show this help message</li>
-                <li><i class="fas fa-stop-circle"></i> <code>:stop</code> - Stop the agent</li>
+            <ul id="command-list">
+                <li data-command=":introspect">
+                    <div class="command-icon"><i class="fas fa-search"></i></div>
+                    <div class="command-details">
+                        <code class="command-name">:introspect</code>
+                        <p class="command-description">Show current internal state</p>
+                    </div>
+                </li>
+                <li data-command=":status">
+                    <div class="command-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="command-details">
+                        <code class="command-name">:status</code>
+                        <p class="command-description">Show current status</p>
+                    </div>
+                </li>
+                <li data-command=":help">
+                    <div class="command-icon"><i class="fas fa-question-circle"></i></div>
+                    <div class="command-details">
+                        <code class="command-name">:help</code>
+                        <p class="command-description">Show this help message</p>
+                    </div>
+                </li>
+                <li data-command=":stop">
+                    <div class="command-icon"><i class="fas fa-stop-circle"></i></div>
+                    <div class="command-details">
+                        <code class="command-name">:stop</code>
+                        <p class="command-description">Stop the agent</p>
+                    </div>
+                </li>
             </ul>
         </div>
     </div>

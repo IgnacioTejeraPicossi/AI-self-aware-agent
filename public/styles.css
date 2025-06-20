@@ -276,27 +276,42 @@ h1 {
     text-align: center;
 }
 
-.commands ul {
+#command-list {
     list-style: none;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+#command-list li {
+    display: flex;
+    align-items: center;
     gap: 1rem;
-}
-
-.commands li {
-    margin-bottom: 0.5rem;
-    padding: 0.8rem;
+    padding: 1rem;
     background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
-    border-radius: 10px;
+    border-radius: 15px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: transform 0.3s ease;
+    transition: all 0.3s ease;
+    cursor: pointer;
 }
 
-.commands li:hover {
-    transform: translateX(5px);
+#command-list li:hover {
+    transform: translateY(-5px) scale(1.03);
+    background: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
 }
 
-.commands code {
+.command-icon {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.command-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.command-name {
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     color: white;
     padding: 0.3rem 0.6rem;
@@ -304,6 +319,14 @@ h1 {
     font-family: 'Courier New', monospace;
     font-weight: bold;
     box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    margin-bottom: 0.25rem;
+    align-self: flex-start;
+}
+
+.command-description {
+    font-size: 0.9rem;
+    color: var(--text-color);
+    opacity: 0.8;
 }
 
 /* Status colors with enhanced styling */
@@ -417,12 +440,6 @@ h1 {
     font-size: 1.2rem;
     margin-right: 0.5rem;
     color: var(--accent-color);
-}
-
-.commands li i {
-    margin-right: 0.5rem;
-    color: var(--accent-color);
-    width: 16px;
 }
 
 #send-button i {
