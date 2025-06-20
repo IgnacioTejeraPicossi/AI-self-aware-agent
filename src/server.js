@@ -55,9 +55,12 @@ wss.on('connection', (ws) => {
       if (data.type === 'input') {
         let response;
         
+        // Add user message to history
+        agent.self.addToConversationHistory('user', data.content);
+        
         // Choose AI model based on request
         if (data.model === 'claude') {
-          response = await claudeWithSDK(data.content);
+          response = await claudeWithSDK(agent.self, data.content);
         } else {
           // Default to existing Gemini model
           const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -115,8 +118,9 @@ app.post('/api/claude/chat', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
-
-    const response = await claudeWithSDK(message);
+    
+    // For API endpoints, we don't have long-term history, but can still use personality
+    const response = await claudeWithSDK(agent.self, message);
     res.json({ response });
   } catch (error) {
     console.error('Claude API Error:', error);
@@ -134,12 +138,9 @@ app.post('/api/claude/stream', async (req, res) => {
     if (!message) {
       return res.status(400).json({ error: 'Message is required' });
     }
-
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-
-    await claudeStreaming(message, (chunk) => {
+    
+    // For API endpoints, we don't have long-term history, but can still use personality
+    await claudeStreaming(agent.self, message, (chunk) => {
       res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
     });
 
@@ -230,7 +231,7 @@ async function generateResponse(input) {
     if (isOpenAIConfigured()) {
       response = await chatGPT(input);
     } else if (isClaudeConfigured()) {
-      response = await claudeWithSDK(input);
+      response = await claudeWithSDK(agent.self, input);
     } else if (isDeepseekConfigured()) {
       response = await deepseekChat([{ role: 'user', content: input }]);
     } else if (isQwenConfigured()) {

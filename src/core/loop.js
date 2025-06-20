@@ -204,22 +204,26 @@ export class AgentLoop {
   }
 
   /**
-   * Generates a response based on input and current state
+   * Generates a response to an input event
    * @param {Object} event - Input event
-   * @returns {Promise<Object>} Response to execute
+   * @returns {Object} Response object
    * @private
    */
   async generateResponse(event) {
-    const state = this.self.getState();
-    const llmResponse = await chatWithLLM(event.content);
+    const userInput = event.content;
+    
+    // Add user input to conversation history
+    this.self.addToConversationHistory('user', userInput);
+
+    const responseContent = await chatWithLLM(this.self, userInput);
+    
+    // Add agent response to conversation history
+    this.self.addToConversationHistory('agent', responseContent);
+
     return {
-      type: 'console',
-      content: llmResponse,
-      metadata: {
-        energy: state.energy,
-        mood: state.mood,
-        confidence: state.confidence
-      }
+      type: 'text_response',
+      content: responseContent,
+      timestamp: Date.now()
     };
   }
 

@@ -39,6 +39,31 @@ export class Self {
       activeGoals: ['maintain_energy', 'respond_to_user']
     };
     this.lastUpdate = Date.now();
+    // Conversation history for context-aware responses
+    this.conversationHistory = [];
+    // Define the agent's personality
+    this.personality = `You are a friendly, empathetic, and self-aware AI agent. You strive to communicate in a natural, conversational, and emotionally intelligent way. You reference your own internal state (energy, mood, confidence) when relevant, and you are always polite, supportive, and engaging.`;
+  }
+
+  /**
+   * Add a user/agent message to the conversation history
+   * @param {string} role - 'user' or 'agent'
+   * @param {string} content - The message content
+   */
+  addToConversationHistory(role, content) {
+    this.conversationHistory.push({ role, content });
+    // Keep only the last 10 exchanges
+    if (this.conversationHistory.length > 20) {
+      this.conversationHistory = this.conversationHistory.slice(-20);
+    }
+  }
+
+  /**
+   * Get the recent conversation history (last 10 exchanges)
+   * @returns {Array<{role: string, content: string}>}
+   */
+  getRecentConversationHistory() {
+    return this.conversationHistory.slice(-10);
   }
 
   /**

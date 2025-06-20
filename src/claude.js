@@ -12,14 +12,19 @@ const claude = new Anthropic({
  * @param {string} message - The message to send to Claude
  * @returns {Promise<string>} The response from Claude
  */
-export async function claudeWithSDK(message) {
+export async function claudeWithSDK(self, userInput) {
     try {
+        const conversationHistory = self.getRecentConversationHistory();
+        const messages = [
+            ...conversationHistory,
+            { role: "user", content: userInput }
+        ];
+
         const response = await claude.messages.create({
             model: "claude-3-sonnet-20240229",
             max_tokens: 1000,
-            messages: [
-                { role: "user", content: message }
-            ]
+            system: self.personality,
+            messages: messages
         });
         return response.content[0].text;
     } catch (error) {
@@ -34,14 +39,19 @@ export async function claudeWithSDK(message) {
  * @param {Function} onChunk - Callback function to handle each chunk of the response
  * @returns {Promise<void>}
  */
-export async function claudeStreaming(message, onChunk) {
+export async function claudeStreaming(self, userInput, onChunk) {
     try {
+        const conversationHistory = self.getRecentConversationHistory();
+        const messages = [
+            ...conversationHistory,
+            { role: "user", content: userInput }
+        ];
+
         const stream = await claude.messages.stream({
             model: "claude-3-sonnet-20240229",
             max_tokens: 1000,
-            messages: [
-                { role: "user", content: message }
-            ]
+            system: self.personality,
+            messages: messages
         });
 
         for await (const chunk of stream) {
