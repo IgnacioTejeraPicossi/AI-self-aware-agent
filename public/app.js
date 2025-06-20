@@ -8,20 +8,25 @@ const sendButton = document.getElementById('send-button');
 const energyDisplay = document.getElementById('energy');
 const moodDisplay = document.getElementById('mood');
 const confidenceDisplay = document.getElementById('confidence');
+const statusDot = document.querySelector('.status-dot');
+const statusText = document.querySelector('.status-text');
 
 // WebSocket event handlers
 ws.onopen = () => {
     console.log('Connected to server');
+    updateConnectionStatus('connected');
     addMessage('System', 'Connected to AI Self-Aware Agent', 'system');
 };
 
 ws.onclose = () => {
     console.log('Disconnected from server');
+    updateConnectionStatus('disconnected');
     addMessage('System', 'Disconnected from server', 'system');
 };
 
 ws.onerror = (error) => {
     console.error('WebSocket error:', error);
+    updateConnectionStatus('error');
     addMessage('System', 'Error connecting to server', 'error');
 };
 
@@ -50,6 +55,26 @@ userInput.addEventListener('keypress', (e) => {
 });
 
 // Functions
+function updateConnectionStatus(status) {
+    switch (status) {
+        case 'connected':
+            statusDot.style.background = '#27ae60';
+            statusText.textContent = 'Connected';
+            statusText.style.color = '#27ae60';
+            break;
+        case 'disconnected':
+            statusDot.style.background = '#e74c3c';
+            statusText.textContent = 'Disconnected';
+            statusText.style.color = '#e74c3c';
+            break;
+        case 'error':
+            statusDot.style.background = '#f39c12';
+            statusText.textContent = 'Error';
+            statusText.style.color = '#f39c12';
+            break;
+    }
+}
+
 function sendMessage() {
     const message = userInput.value.trim();
     if (message) {
@@ -59,6 +84,9 @@ function sendMessage() {
         }));
         addMessage('You', message, 'user');
         userInput.value = '';
+        
+        // Add loading indicator
+        addLoadingMessage();
     }
 }
 
@@ -81,21 +109,100 @@ function addMessage(sender, content, type) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-function updateStatus(state) {
-    // Update energy with color coding
-    energyDisplay.textContent = `${Math.round(state.energy)}%`;
-    energyDisplay.className = 'value ' + 
-        (state.energy > 50 ? 'energy-high' : 
-         state.energy > 20 ? 'energy-medium' : 'energy-low');
+function addLoadingMessage() {
+    const loadingDiv = document.createElement('div');
+    loadingDiv.className = 'message system-message';
+    loadingDiv.id = 'loading-message';
     
-    // Update mood with emoji
-    const moodEmoji = state.mood > 0.5 ? '😊' : 
-                     state.mood < -0.5 ? '😔' : '😐';
-    moodDisplay.textContent = moodEmoji;
+    const loadingSpan = document.createElement('span');
+    loadingSpan.className = 'loading';
     
-    // Update confidence
-    confidenceDisplay.textContent = `${Math.round(state.confidence * 100)}%`;
+    const textSpan = document.createElement('span');
+    textSpan.textContent = ' Agent is thinking...';
+    
+    loadingDiv.appendChild(loadingSpan);
+    loadingDiv.appendChild(textSpan);
+    
+    chatMessages.appendChild(loadingDiv);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
 }
 
-// Add welcome message
-addMessage('System', 'Welcome to the AI Self-Aware Agent interface! Type a message or use :help for commands.', 'system'); 
+function removeLoadingMessage() {
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) {
+        loadingMessage.remove();
+    }
+}
+
+function updateStatus(state) {
+    // Remove loading message when we get a response
+    removeLoadingMessage();
+    
+    // Update energy with color coding and pulse animation
+    energyDisplay.textContent = `${Math.round(state.energy)}%`;
+    energyDisplay.className = 'value pulse ' + 
+        (state.energy > 70 ? 'energy-high' : 
+         state.energy > 30 ? 'energy-medium' : 'energy-low');
+    
+    // Update mood with emoji and color coding
+    let moodEmoji, moodClass;
+    if (state.mood > 0.3) {
+        moodEmoji = '😊';
+        moodClass = 'mood-happy';
+    } else if (state.mood < -0.3) {
+        moodEmoji = '😔';
+        moodClass = 'mood-sad';
+    } else {
+        moodEmoji = '😐';
+        moodClass = 'mood-neutral';
+    }
+    moodDisplay.textContent = moodEmoji;
+    moodDisplay.className = 'value pulse ' + moodClass;
+    
+    // Update confidence with color coding
+    const confidencePercent = Math.round(state.confidence * 100);
+    confidenceDisplay.textContent = `${confidencePercent}%`;
+    confidenceDisplay.className = 'value pulse ' + 
+        (confidencePercent > 70 ? 'confidence-high' : 
+         confidencePercent > 40 ? 'confidence-medium' : 'confidence-low');
+    
+    // Add visual feedback for status changes
+    const statusItems = document.querySelectorAll('.status-item');
+    statusItems.forEach(item => {
+        item.classList.add('pulse');
+        setTimeout(() => item.classList.remove('pulse'), 600);
+    });
+}
+
+// Add welcome message with colorful styling
+addMessage('System', '🎉 Welcome to the AI Self-Aware Agent interface! 🌟', 'system');
+addMessage('System', 'Type a message or use :help for available commands.', 'system');
+
+// Add some visual flair to the interface
+document.addEventListener('DOMContentLoaded', () => {
+    // Add subtle animation to the header
+    const header = document.querySelector('header');
+    header.style.animation = 'fadeInUp 1s ease';
+    
+    // Add hover effects to status items
+    const statusItems = document.querySelectorAll('.status-item');
+    statusItems.forEach(item => {
+        item.addEventListener('mouseenter', () => {
+            item.style.transform = 'translateY(-5px) scale(1.02)';
+        });
+        item.addEventListener('mouseleave', () => {
+            item.style.transform = 'translateY(0) scale(1)';
+        });
+    });
+    
+    // Add typing indicator
+    let typingTimeout;
+    userInput.addEventListener('input', () => {
+        clearTimeout(typingTimeout);
+        sendButton.style.background = 'linear-gradient(135deg, #f093fb, #667eea)';
+        
+        typingTimeout = setTimeout(() => {
+            sendButton.style.background = 'linear-gradient(135deg, #f093fb, #667eea)';
+        }, 1000);
+    });
+}); 
