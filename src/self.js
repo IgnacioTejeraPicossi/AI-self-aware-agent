@@ -113,6 +113,25 @@ export class Self {
   }
 
   /**
+   * Adjusts the agent's mood based on the sentiment of user input.
+   * A positive score boosts the mood, a negative score lowers it.
+   * @param {number} sentimentScore - The sentiment score from the analysis.
+   */
+  updateMoodFromSentiment(sentimentScore) {
+    // The sentiment score is normalized by the number of words, so we can use a multiplier
+    // to make the mood change more significant.
+    const moodImpact = sentimentScore * 0.1; // Multiplier to control sensitivity
+    this.state.mood = Math.max(-1, Math.min(1, this.state.mood + moodImpact));
+    
+    // Add an event to remember this emotional interaction
+    if (moodImpact > 0) {
+      this.state.recentEvents.push('positive_user_interaction');
+    } else if (moodImpact < 0) {
+      this.state.recentEvents.push('negative_user_interaction');
+    }
+  }
+
+  /**
    * Returns a snapshot of the current internal state
    * @returns {InternalState} Current internal state
    */

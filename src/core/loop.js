@@ -5,6 +5,7 @@ import { chatWithLLM } from '../llm/llm.js';
 import { Self } from '../self.js';
 import { KeyboardSensor } from '../sensors/keyboard.js';
 import { MemoryDB } from '../memory/db.js';
+import { analyzeSentiment } from '../analysis/sentiment.js';
 
 // ANSI color codes
 const colors = {
@@ -154,6 +155,10 @@ export class AgentLoop {
         await this.handleCommand(event.content.slice(1));
         return;
       }
+
+      // Analyze sentiment and update mood
+      const sentiment = analyzeSentiment(event.content);
+      this.self.updateMoodFromSentiment(sentiment.score);
 
       // Update internal state with the new event
       this.self.update([`input_${event.type}`]);

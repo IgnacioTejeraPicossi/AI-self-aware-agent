@@ -11,6 +11,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 import { claudeWithSDK, claudeStreaming, isClaudeConfigured } from './claude.js';
 import { deepseekChat, deepseekStreaming, isDeepseekConfigured } from './deepseek.js';
 import { qwenChat, qwenStreaming, isQwenConfigured } from './qwen.js';
+import { analyzeSentiment } from './analysis/sentiment.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -53,6 +54,10 @@ wss.on('connection', (ws) => {
       const data = JSON.parse(message);
       
       if (data.type === 'input') {
+        // Analyze sentiment and update agent's mood
+        const sentiment = analyzeSentiment(data.content);
+        agent.self.updateMoodFromSentiment(sentiment.score);
+
         let response;
         
         // Add user message to history

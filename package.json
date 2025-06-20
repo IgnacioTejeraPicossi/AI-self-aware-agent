@@ -22,6 +22,7 @@
     "node-microphone": "^0.1.0",
     "node-webcam": "^0.8.2",
     "openai": "^5.1.0",
+    "sentiment": "^5.0.2",
     "sqlite": "^5.1.1",
     "sqlite3": "^5.1.7",
     "ws": "^8.18.2"
