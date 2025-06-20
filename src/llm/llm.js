@@ -27,10 +27,21 @@ async function setupGemini() {
 await setupOpenAI();
 await setupGemini();
 
-export async function chatWithLLM(self, userInput) {
+export async function chatWithLLM(self, userInput, textAnalysis) {
   const conversationHistory = self.getRecentConversationHistory();
+  
+  let systemPrompt = self.personality;
+  if (textAnalysis) {
+    if (textAnalysis.isQuestion) {
+      systemPrompt += ` The user is asking a question.`;
+    }
+    if (textAnalysis.topics.length > 0) {
+      systemPrompt += ` The user seems to be talking about: ${textAnalysis.topics.join(', ')}.`;
+    }
+  }
+
   const messages = [
-    { role: 'system', content: self.personality },
+    { role: 'system', content: systemPrompt },
     ...conversationHistory,
     { role: 'user', content: userInput },
   ];
@@ -54,7 +65,7 @@ export async function chatWithLLM(self, userInput) {
   if (gemini && process.env.GEMINI_API_KEY) {
     try {
       // For Gemini, we need to format the prompt differently
-      const geminiPrompt = `${self.personality}\n\nConversation History:\n${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nuser: ${userInput}`;
+      const geminiPrompt = `${systemPrompt}\n\nConversation History:\n${conversationHistory.map(m => `${m.role}: ${m.content}`).join('\n')}\n\nuser: ${userInput}`;
       const model = gemini.getGenerativeModel({ model: 'gemini-pro' });
       const result = await model.generateContent(geminiPrompt);
       return result.response.text();

@@ -6,6 +6,7 @@ import { Self } from '../self.js';
 import { KeyboardSensor } from '../sensors/keyboard.js';
 import { MemoryDB } from '../memory/db.js';
 import { analyzeSentiment } from '../analysis/sentiment.js';
+import { analyzeText } from '../analysis/text.js';
 
 // ANSI color codes
 const colors = {
@@ -220,7 +221,11 @@ export class AgentLoop {
     // Add user input to conversation history
     this.self.addToConversationHistory('user', userInput);
 
-    const responseContent = await chatWithLLM(this.self, userInput);
+    // Analyze the text to get more context
+    const textAnalysis = analyzeText(userInput);
+
+    // Generate the full prompt with personality, history, and text analysis
+    const responseContent = await chatWithLLM(this.self, userInput, textAnalysis);
     
     // Add agent response to conversation history
     this.self.addToConversationHistory('agent', responseContent);

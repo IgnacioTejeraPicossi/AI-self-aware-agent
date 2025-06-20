@@ -12,6 +12,7 @@ import { claudeWithSDK, claudeStreaming, isClaudeConfigured } from './claude.js'
 import { deepseekChat, deepseekStreaming, isDeepseekConfigured } from './deepseek.js';
 import { qwenChat, qwenStreaming, isQwenConfigured } from './qwen.js';
 import { analyzeSentiment } from './analysis/sentiment.js';
+import { analyzeText } from './analysis/text.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,9 +64,12 @@ wss.on('connection', (ws) => {
         // Add user message to history
         agent.self.addToConversationHistory('user', data.content);
         
+        // Analyze text for more context
+        const textAnalysis = analyzeText(data.content);
+
         // Choose AI model based on request
         if (data.model === 'claude') {
-          response = await claudeWithSDK(agent.self, data.content);
+          response = await claudeWithSDK(agent.self, data.content, textAnalysis);
         } else {
           // Default to existing Gemini model
           const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -125,7 +129,8 @@ app.post('/api/claude/chat', async (req, res) => {
     }
     
     // For API endpoints, we don't have long-term history, but can still use personality
-    const response = await claudeWithSDK(agent.self, message);
+    const textAnalysis = analyzeText(message);
+    const response = await claudeWithSDK(agent.self, message, textAnalysis);
     res.json({ response });
   } catch (error) {
     console.error('Claude API Error:', error);
@@ -145,7 +150,8 @@ app.post('/api/claude/stream', async (req, res) => {
     }
     
     // For API endpoints, we don't have long-term history, but can still use personality
-    await claudeStreaming(agent.self, message, (chunk) => {
+    const textAnalysis = analyzeText(message);
+    await claudeStreaming(agent.self, message, textAnalysis, (chunk) => {
       res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
     });
 

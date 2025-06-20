@@ -12,9 +12,20 @@ const claude = new Anthropic({
  * @param {string} message - The message to send to Claude
  * @returns {Promise<string>} The response from Claude
  */
-export async function claudeWithSDK(self, userInput) {
+export async function claudeWithSDK(self, userInput, textAnalysis) {
     try {
         const conversationHistory = self.getRecentConversationHistory();
+        
+        let systemPrompt = self.personality;
+        if (textAnalysis) {
+            if (textAnalysis.isQuestion) {
+                systemPrompt += ` The user is asking a question.`;
+            }
+            if (textAnalysis.topics.length > 0) {
+                systemPrompt += ` The user seems to be talking about: ${textAnalysis.topics.join(', ')}.`;
+            }
+        }
+
         const messages = [
             ...conversationHistory,
             { role: "user", content: userInput }
@@ -23,7 +34,7 @@ export async function claudeWithSDK(self, userInput) {
         const response = await claude.messages.create({
             model: "claude-3-sonnet-20240229",
             max_tokens: 1000,
-            system: self.personality,
+            system: systemPrompt,
             messages: messages
         });
         return response.content[0].text;
@@ -39,9 +50,20 @@ export async function claudeWithSDK(self, userInput) {
  * @param {Function} onChunk - Callback function to handle each chunk of the response
  * @returns {Promise<void>}
  */
-export async function claudeStreaming(self, userInput, onChunk) {
+export async function claudeStreaming(self, userInput, textAnalysis, onChunk) {
     try {
         const conversationHistory = self.getRecentConversationHistory();
+
+        let systemPrompt = self.personality;
+        if (textAnalysis) {
+            if (textAnalysis.isQuestion) {
+                systemPrompt += ` The user is asking a question.`;
+            }
+            if (textAnalysis.topics.length > 0) {
+                systemPrompt += ` The user seems to be talking about: ${textAnalysis.topics.join(', ')}.`;
+            }
+        }
+
         const messages = [
             ...conversationHistory,
             { role: "user", content: userInput }
@@ -50,7 +72,7 @@ export async function claudeStreaming(self, userInput, onChunk) {
         const stream = await claude.messages.stream({
             model: "claude-3-sonnet-20240229",
             max_tokens: 1000,
-            system: self.personality,
+            system: systemPrompt,
             messages: messages
         });
 

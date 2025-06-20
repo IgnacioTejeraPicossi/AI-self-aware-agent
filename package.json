@@ -16,6 +16,7 @@
     "@google/generative-ai": "^0.24.1",
     "@tensorflow/tfjs-node": "^4.17.0",
     "brain.js": "^2.0.0-beta.23",
+    "compromise": "^14.14.4",
     "cors": "^2.8.5",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
