@@ -56,8 +56,8 @@ export async function chatWithLLM(self, userInput, textAnalysis) {
       });
       return completion.choices[0].message.content.trim();
     } catch (err) {
-      // If OpenAI fails, fall through to Gemini
       console.warn('[Agent] OpenAI error:', err.message);
+      // Don't return here, fall through to the next model
     }
   }
 
@@ -71,9 +71,17 @@ export async function chatWithLLM(self, userInput, textAnalysis) {
       return result.response.text();
     } catch (err) {
       console.warn('[Agent] Gemini error:', err.message);
+      // Don't return here, fall through to the fallback
     }
   }
 
-  // Fallback
-  return `I'm running in local mode. No valid LLM API key was found, so I can only give basic responses. Your message was: ${userInput}`;
+  // Fallback message if all API-based models fail
+  let fallbackMessage = "I'm currently running in local mode. ";
+  if (process.env.OPENAI_API_KEY || process.env.GEMINI_API_KEY) {
+    fallbackMessage += "I tried to connect to the configured AI services (OpenAI, Gemini), but it seems the keys are invalid or the services are unreachable. Please check the server console for specific errors.";
+  } else {
+    fallbackMessage += "No LLM API key was found, so I can only give basic responses.";
+  }
+  fallbackMessage += ` Your message was: ${userInput}`;
+  return fallbackMessage;
 }

@@ -55,40 +55,55 @@ wss.on('connection', (ws) => {
       const data = JSON.parse(message);
       
       if (data.type === 'input') {
-        // Analyze sentiment and update agent's mood
-        const sentiment = analyzeSentiment(data.content);
-        agent.self.updateMoodFromSentiment(sentiment.score);
+        let responseContent;
 
-        let response;
-        
-        // Add user message to history
-        agent.self.addToConversationHistory('user', data.content);
-        
-        // Analyze text for more context
-        const textAnalysis = analyzeText(data.content);
+        try {
+          // Analyze sentiment and update agent's mood
+          const sentiment = analyzeSentiment(data.content);
+          agent.self.updateMoodFromSentiment(sentiment.score);
+          
+          // Add user message to history
+          agent.self.addToConversationHistory('user', data.content);
+          
+          // Analyze text for more context
+          const textAnalysis = analyzeText(data.content);
 
-        // Choose AI model based on request
-        if (data.model === 'claude') {
-          response = await claudeWithSDK(agent.self, data.content, textAnalysis);
-        } else {
-          // Default to existing Gemini model
-          const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-          const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-          response = await agent.generateResponse({
-            type: 'keyboard_input',
-            timestamp: Date.now(),
-            content: data.content,
-            metadata: {
-              length: data.content.length,
-              hasSpecialChars: /[^a-zA-Z0-9\s]/.test(data.content)
-            }
-          });
+          // Choose AI model based on request
+          if (data.model === 'claude') {
+            responseContent = await claudeWithSDK(agent.self, data.content, textAnalysis);
+          } else if (data.model === 'deepseek') {
+            responseContent = await deepseekChat(agent.self, data.content, textAnalysis);
+          } else {
+            // Default to existing Gemini/OpenAI model
+            const respObj = await agent.generateResponse({
+              type: 'keyboard_input',
+              timestamp: Date.now(),
+              content: data.content
+            });
+            responseContent = respObj.content;
+          }
+        } catch (error) {
+          console.error('LLM Initialization Error:', error.message);
+          responseContent = `It looks like the API key for the selected model (${data.model}) is not configured on the server. Please add it to the .env file.`;
         }
+        
+        const responsePayload = {
+          type: 'text_response',
+          content: responseContent,
+          timestamp: Date.now(),
+          metadata: {
+            length: data.content.length,
+            hasSpecialChars: /[^a-zA-Z0-9\s]/.test(data.content)
+          }
+        };
+        
+        // Add agent response to history
+        agent.self.addToConversationHistory('agent', responsePayload.content);
 
         // Send response back to client
         ws.send(JSON.stringify({
           type: 'response',
-          data: response
+          data: responsePayload
         }));
 
         // Update state
@@ -165,8 +180,9 @@ app.post('/api/claude/stream', async (req, res) => {
 // Add new API endpoints for DeepSeek
 app.post('/api/deepseek/chat', async (req, res) => {
   try {
-    const { messages } = req.body;
-    const response = await deepseekChat(messages);
+    const { message } = req.body;
+    const textAnalysis = analyzeText(message);
+    const response = await deepseekChat(agent.self, message, textAnalysis);
     res.json({ response });
   } catch (error) {
     console.error('DeepSeek chat error:', error);
@@ -176,12 +192,13 @@ app.post('/api/deepseek/chat', async (req, res) => {
 
 app.post('/api/deepseek/stream', async (req, res) => {
   try {
-    const { messages } = req.body;
+    const { message } = req.body;
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
     res.setHeader('Connection', 'keep-alive');
 
-    await deepseekStreaming(messages, (chunk) => {
+    const textAnalysis = analyzeText(message);
+    await deepseekStreaming(agent.self, message, textAnalysis, (chunk) => {
       res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
     });
 
@@ -212,7 +229,7 @@ app.post('/api/qwen/stream', async (req, res) => {
     res.setHeader('Connection', 'keep-alive');
 
     await qwenStreaming(messages, (chunk) => {
-      res.write(`data: ${JSON.stringify({ content: chunk })}\n\n`);
+      res.write(`data: ${JSON.stringify({ chunk })}\n\n`);
     });
 
     res.end();
@@ -221,39 +238,3 @@ app.post('/api/qwen/stream', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-// Start server
-server.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
-
-console.log('Loaded OPENAI_API_KEY:', process.env.OPENAI_API_KEY ? '[HIDDEN]' : '[NOT FOUND]');
-
-// Initialize Gemini
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
-console.log('Gemini model initialized');
-
-// Update the model selection logic in the generateResponse function
-async function generateResponse(input) {
-  let response;
-  try {
-    // Try each model in order of preference
-    if (isOpenAIConfigured()) {
-      response = await chatGPT(input);
-    } else if (isClaudeConfigured()) {
-      response = await claudeWithSDK(agent.self, input);
-    } else if (isDeepseekConfigured()) {
-      response = await deepseekChat([{ role: 'user', content: input }]);
-    } else if (isQwenConfigured()) {
-      response = await qwenChat([{ role: 'user', content: input }]);
-    } else {
-      // Fallback to local response
-      response = `I understand you said: "${input}"`;
-    }
-  } catch (error) {
-    console.error('Error generating response:', error);
-    response = `I encountered an error: ${error.message}`;
-  }
-  return response;
-} 

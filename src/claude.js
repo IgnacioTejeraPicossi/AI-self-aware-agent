@@ -39,8 +39,8 @@ export async function claudeWithSDK(self, userInput, textAnalysis) {
         });
         return response.content[0].text;
     } catch (error) {
-        console.error("Claude API Error:", error);
-        return null;
+        console.error("Claude API Error:", error.message);
+        return `I'm sorry, I encountered an issue while trying to reach the Claude API. The API key could be invalid, or there might be a network problem. The server console may have more details.`;
     }
 }
 
@@ -82,7 +82,8 @@ export async function claudeStreaming(self, userInput, textAnalysis, onChunk) {
             }
         }
     } catch (error) {
-        console.error("Claude Streaming Error:", error);
+        console.error("Claude Streaming Error:", error.message);
+        onChunk(`\n\n[Error: Could not connect to Claude API. Please check the server console.]`);
     }
 }
 

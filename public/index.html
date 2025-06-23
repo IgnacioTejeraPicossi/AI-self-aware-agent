@@ -35,6 +35,14 @@
         <div class="chat-container">
             <div class="chat-header">
                 <h3><i class="fas fa-comments"></i> Conversation</h3>
+                <div class="model-selector">
+                    <label for="model-select"><i class="fas fa-cogs"></i> Model:</label>
+                    <select id="model-select">
+                        <option value="default">Default (Gemini/OpenAI)</option>
+                        <option value="claude">Claude</option>
+                        <option value="deepseek">DeepSeek</option>
+                    </select>
+                </div>
                 <div class="connection-status">
                     <span class="status-dot"></span>
                     <span class="status-text">Connected</span>

@@ -457,4 +457,27 @@ h1 {
 
 .confidence-high i { color: #27ae60; }
 .confidence-medium i { color: #f39c12; }
-.confidence-low i { color: #e74c3c; } 
+.confidence-low i { color: #e74c3c; }
+
+.model-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: white;
+}
+
+#model-select {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+#model-select option {
+    background: var(--secondary-color);
+    color: white;
+} 

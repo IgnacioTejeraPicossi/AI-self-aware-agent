@@ -10,6 +10,7 @@ const moodDisplay = document.getElementById('mood');
 const confidenceDisplay = document.getElementById('confidence');
 const statusDot = document.querySelector('.status-dot');
 const statusText = document.querySelector('.status-text');
+const modelSelect = document.getElementById('model-select');
 
 // WebSocket event handlers
 ws.onopen = () => {
@@ -77,10 +78,12 @@ function updateConnectionStatus(status) {
 
 function sendMessage() {
     const message = userInput.value.trim();
+    const selectedModel = modelSelect.value;
     if (message) {
         ws.send(JSON.stringify({
             type: 'input',
-            content: message
+            content: message,
+            model: selectedModel
         }));
         addMessage('You', message, 'user');
         userInput.value = '';
